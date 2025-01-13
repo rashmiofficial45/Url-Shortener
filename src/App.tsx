@@ -7,8 +7,6 @@ import { Routes, Route } from "react-router";
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Auth from './pages/Auth';
-// import Login from './pages/Login';
-// import SignUp from './pages/SignUp';
 
 function Page() {
   return (
@@ -23,8 +21,6 @@ function Page() {
 */}
   <Route path="auth">
     <Route index element={<Auth />} />
-    {/* <Route path="login" element={<Login />} />
-    <Route path="signup" element={<SignUp />} /> */}
   </Route>
 </Routes>
 

@@ -11,6 +11,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { login } from "@/api/authLogin";
+import { useFetch } from "@/hooks/useFetch";
+import { useNavigate } from "react-router";
 
 // Define Zod schema for validation
 const loginSchema = z.object({
@@ -22,6 +25,7 @@ const loginSchema = z.object({
 });
 
 const Login = () => {
+  const navigate = useNavigate();
   // State for form data and errors
   const [formData, setFormData] = useState({
     email: "",
@@ -31,11 +35,12 @@ const Login = () => {
     {}
   );
 
+  // Use custom fetch hook
+  const { loading, error, execute } = useFetch();
+
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    // Update form data and clear errors for the field
     setFormData((prevState) => ({
       ...prevState,
       [name]: value,
@@ -47,14 +52,28 @@ const Login = () => {
   };
 
   // Handle form submission
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       // Validate form data using Zod schema
-      loginSchema.parse(formData);
+      const parsedData = loginSchema.parse(formData);
+      console.log("Form submitted successfully:", parsedData);
 
-      console.log("Form submitted successfully:", formData);
-      // Proceed with login logic (e.g., API call)
+      // Use `execute` from `useFetch` to handle the API call
+      const response = await execute(() => login(parsedData)); // execute returns the data
+
+      if (response) {
+        console.log("Login successful:", response);
+
+        // Optionally, store the session data (e.g., in localStorage or a context)
+        localStorage.setItem("session", JSON.stringify(response.session));
+        localStorage.setItem("user", JSON.stringify(response.user));
+
+        // Redirect or navigate upon successful login
+        navigate("/");
+      } else {
+        console.error("No response received after login.");
+      }
     } catch (err) {
       if (err instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
@@ -85,10 +104,12 @@ const Login = () => {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                type="email"
                 name="email"
                 placeholder="john.doe@example.com"
                 value={formData.email}
                 onChange={handleInputChange}
+                disabled={loading}
               />
               {errors.email && (
                 <p className="text-red-500 text-sm">{errors.email}</p>
@@ -100,18 +121,22 @@ const Login = () => {
                 id="password"
                 name="password"
                 type="password"
-                placeholder="********"
+                placeholder="******"
                 value={formData.password}
                 onChange={handleInputChange}
+                disabled={loading}
               />
               {errors.password && (
                 <p className="text-red-500 text-sm">{errors.password}</p>
               )}
             </div>
             <CardFooter className="pt-3 pb-0 px-0">
-              <Button type="submit">Submit</Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? "Loading..." : "Submit"}
+              </Button>
             </CardFooter>
           </form>
+          {error && <p className="text-red-500 mt-2">{error}</p>}
         </CardContent>
       </Card>
     </div>
