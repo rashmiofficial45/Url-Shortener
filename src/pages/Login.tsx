@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Loader } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -132,7 +133,11 @@ const Login = () => {
             </div>
             <CardFooter className="pt-3 pb-0 px-0">
               <Button type="submit" disabled={loading}>
-                {loading ? "Loading..." : "Submit"}
+                {loading ? (
+                  <Loader className="w-16 h-16 animate-spin text-white" />
+                ) : (
+                  "Submit"
+                )}
               </Button>
             </CardFooter>
           </form>

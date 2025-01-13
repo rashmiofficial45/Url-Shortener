@@ -11,30 +11,43 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { signup } from "@/api/authSignup";
+import { useFetch } from "@/hooks/useFetch";
+import { useNavigate } from "react-router";
 
 // Zod schema for validation
-const signUpSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z
-    .string()
-    .min(6, { message: "Password must be at least 6 characters long" })
-    .max(25, { message: "Password must be 25 characters or fewer" }),
-  confirmPassword: z
-    .string()
-    .min(6, { message: "Password must be at least 6 characters long" }),
-}).refine((data) => data.password === data.confirmPassword, {
-  path: ["confirmPassword"],
-  message: "Passwords must match",
-});
+const signUpSchema = z
+  .object({
+    email: z.string().email("Invalid email address"),
+    password: z
+      .string()
+      .min(6, { message: "Password must be at least 6 characters long" })
+      .max(25, { message: "Password must be 25 characters or fewer" }),
+    confirmPassword: z
+      .string()
+      .min(6, { message: "Password must be at least 6 characters long" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords must match",
+  });
 
 const SignUp = () => {
+  const navigate = useNavigate();
+
   // State for form data and errors
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     confirmPassword: "",
   });
-  const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
+  const [errors, setErrors] = useState<{
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
+
+  const { loading, error, execute } = useFetch();
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,14 +65,27 @@ const SignUp = () => {
   };
 
   // Handle form submission
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       // Validate form data
-      signUpSchema.parse(formData);
+      const parsedData = signUpSchema.parse(formData);
+      console.log("Form submitted successfully:", parsedData);
 
-      console.log("Form submitted successfully:", formData);
-      // Proceed with sign-up logic (e.g., API call)
+      // Use `execute` from `useFetch` to call the signup API
+      const response = await execute(() => signup(parsedData));
+
+      if (response) {
+        console.log("Signup successful:", response);
+
+        // Store user session data (optional)
+        localStorage.setItem("user", JSON.stringify(response.user));
+
+        // Redirect to login or home page
+        navigate("/");
+      } else {
+        console.error("No response received after signup.");
+      }
     } catch (err) {
       if (err instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
@@ -79,9 +105,7 @@ const SignUp = () => {
       <Card>
         <CardHeader>
           <CardTitle>Sign Up</CardTitle>
-          <CardDescription>
-            Create an account to get started.
-          </CardDescription>
+          <CardDescription>Create an account to get started.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
           <form onSubmit={handleSignUp}>
@@ -93,6 +117,7 @@ const SignUp = () => {
                 placeholder="john.doe@example.com"
                 value={formData.email}
                 onChange={handleInputChange}
+                disabled={loading}
               />
               {errors.email && (
                 <p className="text-red-500 text-sm">{errors.email}</p>
@@ -107,6 +132,7 @@ const SignUp = () => {
                 placeholder="********"
                 value={formData.password}
                 onChange={handleInputChange}
+                disabled={loading}
               />
               {errors.password && (
                 <p className="text-red-500 text-sm">{errors.password}</p>
@@ -121,15 +147,19 @@ const SignUp = () => {
                 placeholder="********"
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
+                disabled={loading}
               />
               {errors.confirmPassword && (
                 <p className="text-red-500 text-sm">{errors.confirmPassword}</p>
               )}
             </div>
             <CardFooter className="pt-3 pb-0 px-0">
-              <Button type="submit">Sign Up</Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? "Signing up..." : "Sign Up"}
+              </Button>
             </CardFooter>
           </form>
+          {error && <p className="text-red-500 mt-2">{error}</p>}
         </CardContent>
       </Card>
     </div>
