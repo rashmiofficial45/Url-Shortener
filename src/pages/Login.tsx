@@ -12,7 +12,7 @@ import { Loader } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { login } from "@/api/authLogin";
+import { login } from "@/api/auth";
 import { useFetch } from "@/hooks/useFetch";
 import { useNavigate, useSearchParams } from "react-router";
 

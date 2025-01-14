@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { signup } from "@/api/authSignup";
+import { signup } from "@/api/auth";
 import { useFetch } from "@/hooks/useFetch";
 import { useNavigate } from "react-router";
 
