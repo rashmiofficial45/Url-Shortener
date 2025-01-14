@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { login } from "@/api/authLogin";
 import { useFetch } from "@/hooks/useFetch";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 
 // Define Zod schema for validation
 const loginSchema = z.object({
@@ -26,7 +26,6 @@ const loginSchema = z.object({
 });
 
 const Login = () => {
-  const navigate = useNavigate();
   // State for form data and errors
   const [formData, setFormData] = useState({
     email: "",
@@ -36,9 +35,10 @@ const Login = () => {
     {}
   );
 
-  // Use custom fetch hook
+  const navigate = useNavigate();
   const { loading, error, execute } = useFetch();
-
+  const [searchParams] = useSearchParams();
+  const longlink = searchParams.get("createNew")
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -70,8 +70,9 @@ const Login = () => {
         localStorage.setItem("session", JSON.stringify(response.session));
         localStorage.setItem("user", JSON.stringify(response.user));
 
+
         // Redirect or navigate upon successful login
-        navigate("/");
+        navigate(`/dashboard?${longlink ? `createNew${longlink}`:""}`);
       } else {
         console.error("No response received after login.");
       }
