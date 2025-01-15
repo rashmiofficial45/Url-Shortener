@@ -1,13 +1,11 @@
 import { useState } from "react";
-interface User {
+export interface User {
     id: string;
     email: string;
     role: string;
-    lastSignIn: string;
-    emailVerified: boolean;
 }
 
-interface Session {
+export interface Session {
     accessToken: string;
     refreshToken: string;
     expiresAt: number;
@@ -41,8 +39,6 @@ export const useFetch = () => {
                     id: user.id,
                     email: user.email,
                     role: user.role,
-                    lastSignIn: user.last_sign_in_at,
-                    emailVerified: user.user_metadata?.email_verified || false,
                 },
                 session: {
                     accessToken: session.access_token,

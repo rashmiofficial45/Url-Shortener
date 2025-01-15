@@ -38,7 +38,8 @@ const Login = () => {
   const navigate = useNavigate();
   const { loading, error, execute } = useFetch();
   const [searchParams] = useSearchParams();
-  const longlink = searchParams.get("createNew")
+  const longlink = searchParams.get("createNew");
+
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -65,14 +66,12 @@ const Login = () => {
 
       if (response) {
         console.log("Login successful:", response);
-
         // Optionally, store the session data (e.g., in localStorage or a context)
         localStorage.setItem("session", JSON.stringify(response.session));
         localStorage.setItem("user", JSON.stringify(response.user));
 
-
         // Redirect or navigate upon successful login
-        navigate(`/dashboard?${longlink ? `createNew${longlink}`:""}`);
+        navigate(`/dashboard?${longlink ? `createNew${longlink}` : ""}`);
       } else {
         console.error("No response received after login.");
       }
